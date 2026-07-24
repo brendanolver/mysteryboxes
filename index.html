@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WNDRR Mystery Box Builder</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --panel: #17171b;
+    --panel2: #1f1f25;
+    --border: #2b2b33;
+    --text: #ececf0;
+    --muted: #8b8b96;
+    --accent: #ffd60a;
+    --accent-text: #111;
+    --good: #30d158;
+    --warn: #ff9f0a;
+    --bad: #ff453a;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.5; padding: 24px 20px 80px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  header h1 { font-size: 20px; letter-spacing: 2px; font-weight: 800; }
+  header h1 span { color: var(--accent); }
+  .ver { color: var(--muted); font-size: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 .stepnum { background: var(--accent); color: var(--accent-text); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+  .drop {
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px; text-align: center;
+    color: var(--muted); cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .drop.dragover { border-color: var(--accent); background: rgba(255, 214, 10, 0.05); color: var(--text); }
+  .drop strong { color: var(--text); }
+  .filechips { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .chip { background: var(--panel2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--muted); }
+  .chip.loaded { border-color: var(--good); color: var(--good); }
+  .matchreport { margin-top: 12px; font-size: 13px; }
+  .matchreport .ok { color: var(--good); }
+  .matchreport .warn { color: var(--warn); }
+  .matchreport ul { margin: 6px 0 0 18px; color: var(--muted); }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+  button.primary:hover { filter: brightness(1.1); }
+  button.small { padding: 3px 9px; font-size: 12px; }
+  button.danger:hover { border-color: var(--bad); color: var(--bad); }
+  input[type=text], input[type=number] {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text);
+    padding: 7px 10px; font-size: 13px; font-family: inherit;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .offer { background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+  .offer-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .offer-head .prio { color: var(--accent); font-weight: 800; font-size: 15px; min-width: 24px; }
+  .offer-head input[name=oname] { flex: 1; min-width: 160px; font-weight: 600; }
+  .offer-head label { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .offer-head input[name=ocap] { width: 80px; }
+  .line { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; }
+  .line .qty { width: 58px; }
+  .line .x { color: var(--muted); padding-top: 8px; }
+  .catpick { position: relative; flex: 1; min-width: 240px; }
+  .catpick > button { width: 100%; text-align: left; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .catpick > button.hascats { color: var(--text); }
+  .catmenu {
+    display: none; position: absolute; z-index: 10; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px;
+    max-height: 260px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+  .catmenu.open { display: block; }
+  .catmenu label { display: flex; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+  .catmenu label:hover { background: var(--panel2); }
+  .catmenu .catqty { margin-left: auto; color: var(--muted); font-size: 11px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border-bottom: 1px solid var(--border); padding: 6px 10px; text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  td.limit { color: var(--muted); font-size: 12px; text-align: left; }
+  .tablewrap { overflow-x: auto; }
+  .result-offer { margin-bottom: 22px; }
+  .result-offer h3 { font-size: 15px; margin-bottom: 4px; }
+  .result-offer h3 .total { color: var(--accent); }
+  .result-offer .sub { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+  .exports { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .empty { color: var(--muted); font-style: italic; }
+  .footnote { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  .pill { display: inline-block; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; font-size: 11px; color: var(--muted); margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>WNDRR <span>MYSTERY BOX</span> BUILDER</h1>
+    <span class="ver">Ver. 1.0.0</span>
+  </header>
+
+  <div class="card">
+    <h2><span class="stepnum">1</span> Upload files</h2>
+    <div class="drop" id="drop">
+      Drop both CSVs here (or click) — <strong>working file</strong> (product level, your curated styles) + <strong>stock export</strong> (variant level)
+      <input type="file" id="fileinput" accept=".csv,text/csv" multiple style="display:none">
+    </div>
+    <div class="filechips">
+      <span class="chip" id="chip-product">Working file: not loaded</span>
+      <span class="chip" id="chip-variant">Stock export: not loaded</span>
+    </div>
+    <div class="matchreport" id="matchreport"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="stepnum">2</span> Mystery box offers <span class="pill">top offer fills first</span></h2>
+    <div id="offers"></div>
+    <button class="primary" id="addoffer">+ Add offer</button>
+    <div class="footnote">Each line is "N × item from these categories". Tick multiple categories to pool them (e.g. one "tees" line covering Box Fit + Heavy Weight). Cap is optional — max boxes across all sizes.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="stepnum">3</span> Results</h2>
+    <div id="results"><div class="empty">Load both files and add an offer to see results.</div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- state ---------- */
+const state = {
+  products: null,   // [{sku, name, category}]
+  variants: null,   // [{sku, name, size, category, soh}]
+  pool: null,       // base pool: { cat: { size: qty } }
+  matchInfo: null,
+  offers: [],       // [{id, name, cap, lines: [{qty, cats: []}]}]
+  nextOfferId: 1
+};
+
+/* ---------- csv parsing ---------- */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQ = false;
+  text = text.replace(/^﻿/, "");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQ = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ",") { row.push(field); field = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(field); field = "";
+        if (row.length > 1 || row[0] !== "") rows.push(row);
+        row = [];
+      } else field += c;
+    }
+  }
+  if (field !== "" || row.length) { row.push(field); if (row.length > 1 || row[0] !== "") rows.push(row); }
+  return rows;
+}
+
+function headerMap(headerRow) {
+  const m = {};
+  headerRow.forEach((h, i) => { m[h.trim().toLowerCase()] = i; });
+  return m;
+}
+
+/* ---------- file loading ---------- */
+function loadCSVText(text, filename) {
+  const rows = parseCSV(text);
+  if (rows.length < 2) return alertMsg(`${filename}: no data rows found.`);
+  const h = headerMap(rows[0]);
+  const isVariant = "size" in h;
+  if (!("sku" in h) || !("product" in h) || !("category" in h)) {
+    return alertMsg(`${filename}: needs SKU, Product and Category columns.`);
+  }
+  if (isVariant && !("soh" in h)) return alertMsg(`${filename}: variant file needs an SOH column.`);
+  const data = rows.slice(1).map(r => {
+    const get = k => (r[h[k]] || "").trim();
+    return {
+      sku: get("sku"),
+      name: get("product"),
+      category: get("category"),
+      size: isVariant ? get("size") : null,
+      soh: isVariant ? Math.max(0, parseInt((get("soh") || "0").replace(/,/g, ""), 10) || 0) : null
+    };
+  }).filter(r => r.sku || r.name);
+  if (isVariant) {
+    state.variants = data;
+    setChip("chip-variant", `Stock export: ${data.length.toLocaleString()} variants ✓`);
+  } else {
+    state.products = data;
+    setChip("chip-product", `Working file: ${data.length.toLocaleString()} styles ✓`);
+  }
+  tryJoin();
+}
+
+function setChip(id, text) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.classList.add("loaded");
+}
+
+function alertMsg(msg) {
+  document.getElementById("matchreport").innerHTML = `<span class="warn">${esc(msg)}</span>`;
+}
+
+/* ---------- join ---------- */
+function tryJoin() {
+  if (!state.products || !state.variants) { compute(); return; }
+  const byName = new Map();
+  state.products.forEach(p => byName.set(p.name.toUpperCase(), p));
+  const skus = state.products.map(p => ({ sku: p.sku.toUpperCase(), p })).filter(x => x.sku);
+
+  const pool = {};
+  const matchedStyles = new Set();
+  let variantRows = 0;
+  state.variants.forEach(v => {
+    let p = byName.get(v.name.toUpperCase());
+    if (!p && v.sku) {
+      const vs = v.sku.toUpperCase();
+      const hit = skus.find(x => vs.startsWith(x.sku));
+      if (hit) p = hit.p;
+    }
+    if (!p) return;
+    matchedStyles.add(p.name.toUpperCase());
+    variantRows++;
+    const cat = p.category || v.category || "UNCATEGORISED";
+    const size = v.size || "OS";
+    if (!pool[cat]) pool[cat] = {};
+    pool[cat][size] = (pool[cat][size] || 0) + v.soh;
+  });
+
+  const unmatched = state.products.filter(p => !matchedStyles.has(p.name.toUpperCase()));
+  state.pool = pool;
+  state.matchInfo = { matched: matchedStyles.size, total: state.products.length, variantRows, unmatched };
+  renderMatchReport();
+  renderOffers();
+  compute();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (Math.abs(m - n) > 6) return 99;
+  const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+
+function renderMatchReport() {
+  const mi = state.matchInfo;
+  const el = document.getElementById("matchreport");
+  if (!mi) { el.innerHTML = ""; return; }
+  let html = `<span class="ok">✓ ${mi.matched} of ${mi.total} styles matched</span> — ${mi.variantRows.toLocaleString()} variant rows pulled in.`;
+  if (mi.unmatched.length) {
+    const names = state.variants ? [...new Set(state.variants.map(v => v.name))] : [];
+    const items = mi.unmatched.slice(0, 15).map(p => {
+      let best = null, bd = 99;
+      for (const n of names) {
+        const d = levenshtein(p.name.toUpperCase(), n.toUpperCase());
+        if (d < bd) { bd = d; best = n; }
+      }
+      const hint = best && bd <= 5 ? ` — closest in export: "${esc(best)}"` : "";
+      return `<li>"${esc(p.name)}" found no stock rows${hint}</li>`;
+    }).join("");
+    html += `<div class="warn" style="margin-top:6px">⚠ ${mi.unmatched.length} style(s) unmatched:</div><ul>${items}${mi.unmatched.length > 15 ? "<li>…</li>" : ""}</ul>`;
+  }
+  el.innerHTML = html;
+}
+
+/* ---------- offers ---------- */
+function addOffer() {
+  state.offers.push({ id: state.nextOfferId++, name: `Mystery Box ${state.offers.length + 1}`, cap: "", lines: [{ qty: 1, cats: [] }] });
+  saveOffers(); renderOffers(); compute();
+}
+
+function categories() {
+  return state.pool ? Object.keys(state.pool).sort() : [];
+}
+
+function catStock(cat) {
+  const sizes = state.pool && state.pool[cat] ? state.pool[cat] : {};
+  return Object.values(sizes).reduce((a, b) => a + b, 0);
+}
+
+function renderOffers() {
+  const el = document.getElementById("offers");
+  if (!state.offers.length) { el.innerHTML = `<div class="empty" style="margin-bottom:12px">No offers yet.</div>`; return; }
+  const cats = categories();
+  el.innerHTML = state.offers.map((o, oi) => `
+    <div class="offer" data-oid="${o.id}">
+      <div class="offer-head">
+        <span class="prio">${oi + 1}</span>
+        <input type="text" name="oname" value="${esc(o.name)}" data-oid="${o.id}">
+        <label>Cap <input type="number" name="ocap" min="0" placeholder="∞" value="${esc(String(o.cap))}" data-oid="${o.id}"></label>
+        <button class="small" data-act="up" data-oid="${o.id}" ${oi === 0 ? "disabled" : ""}>▲</button>
+        <button class="small" data-act="down" data-oid="${o.id}" ${oi === state.offers.length - 1 ? "disabled" : ""}>▼</button>
+        <button class="small danger" data-act="del" data-oid="${o.id}">✕</button>
+      </div>
+      ${o.lines.map((ln, li) => `
+        <div class="line">
+          <input type="number" class="qty" min="1" value="${ln.qty}" data-oid="${o.id}" data-li="${li}" name="lqty">
+          <span class="x">×</span>
+          <div class="catpick">
+            <button class="${ln.cats.length ? "hascats" : ""}" data-act="catmenu" data-oid="${o.id}" data-li="${li}">
+              ${ln.cats.length ? esc(ln.cats.join(" + ")) : "choose categories…"}
+            </button>
+            <div class="catmenu" data-menu="${o.id}-${li}">
+              ${cats.length ? cats.map(c => `
+                <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-cat="${esc(c)}" ${ln.cats.includes(c) ? "checked" : ""}>
+                ${esc(c)}<span class="catqty">${catStock(c).toLocaleString()} units</span></label>`).join("")
+                : `<div class="empty" style="padding:6px">Load files first to see categories.</div>`}
+            </div>
+          </div>
+          <button class="small danger" data-act="delline" data-oid="${o.id}" data-li="${li}" ${o.lines.length === 1 ? "disabled" : ""}>✕</button>
+        </div>`).join("")}
+      <button class="small" data-act="addline" data-oid="${o.id}">+ Add line</button>
+    </div>`).join("");
+}
+
+function findOffer(id) { return state.offers.find(o => o.id === +id); }
+
+document.getElementById("offers").addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const act = btn.dataset.act, o = findOffer(btn.dataset.oid);
+  if (!act || !o) return;
+  const oi = state.offers.indexOf(o);
+  if (act === "up" && oi > 0) [state.offers[oi - 1], state.offers[oi]] = [state.offers[oi], state.offers[oi - 1]];
+  else if (act === "down" && oi < state.offers.length - 1) [state.offers[oi + 1], state.offers[oi]] = [state.offers[oi], state.offers[oi + 1]];
+  else if (act === "del") state.offers.splice(oi, 1);
+  else if (act === "addline") o.lines.push({ qty: 1, cats: [] });
+  else if (act === "delline") o.lines.splice(+btn.dataset.li, 1);
+  else if (act === "catmenu") {
+    const menu = btn.parentElement.querySelector(".catmenu");
+    const wasOpen = menu.classList.contains("open");
+    document.querySelectorAll(".catmenu.open").forEach(m => m.classList.remove("open"));
+    if (!wasOpen) menu.classList.add("open");
+    return; // don't re-render, keep menu open
+  }
+  saveOffers(); renderOffers(); compute();
+});
+
+document.getElementById("offers").addEventListener("change", e => {
+  const t = e.target, o = findOffer(t.dataset.oid);
+  if (!o) return;
+  if (t.name === "oname") o.name = t.value;
+  else if (t.name === "ocap") o.cap = t.value;
+  else if (t.name === "lqty") o.lines[+t.dataset.li].qty = Math.max(1, parseInt(t.value, 10) || 1);
+  else if (t.dataset.cat !== undefined) {
+    const ln = o.lines[+t.dataset.li];
+    if (t.checked) { if (!ln.cats.includes(t.dataset.cat)) ln.cats.push(t.dataset.cat); }
+    else ln.cats = ln.cats.filter(c => c !== t.dataset.cat);
+    const pickBtn = t.closest(".catpick").querySelector("button");
+    pickBtn.textContent = ln.cats.length ? ln.cats.join(" + ") : "choose categories…";
+    pickBtn.classList.toggle("hascats", !!ln.cats.length);
+  }
+  saveOffers(); compute();
+});
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".catpick")) document.querySelectorAll(".catmenu.open").forEach(m => m.classList.remove("open"));
+});
+
+document.getElementById("addoffer").addEventListener("click", addOffer);
+
+function saveOffers() {
+  try { localStorage.setItem("mb_offers", JSON.stringify({ offers: state.offers, next: state.nextOfferId })); } catch (e) {}
+}
+function loadOffers() {
+  try {
+    const s = JSON.parse(localStorage.getItem("mb_offers"));
+    if (s && Array.isArray(s.offers)) { state.offers = s.offers; state.nextOfferId = s.next || 100; }
+  } catch (e) {}
+}
+
+/* ---------- size ordering ---------- */
+const SIZE_ORDER = ["XXS","XS","S","M","L","XL","XXL","XXXL","2XL","3XL","4XL"];
+function sizeSort(a, b) {
+  const ia = SIZE_ORDER.indexOf(a), ib = SIZE_ORDER.indexOf(b);
+  if (ia !== -1 && ib !== -1) return ia - ib;
+  if (ia !== -1) return -1;
+  if (ib !== -1) return 1;
+  const na = parseFloat(a), nb = parseFloat(b);
+  if (!isNaN(na) && !isNaN(nb)) return na - nb;
+  if (!isNaN(na)) return -1;
+  if (!isNaN(nb)) return 1;
+  if (a === "OS") return 1;
+  if (b === "OS") return -1;
+  return a.localeCompare(b);
+}
+
+/* ---------- computation ---------- */
+function poolQty(pool, cats, size) {
+  return cats.reduce((s, c) => s + ((pool[c] && pool[c][size]) || 0), 0);
+}
+
+function compute() {
+  const el = document.getElementById("results");
+  if (!state.pool) { el.innerHTML = `<div class="empty">Load both files to see results.</div>`; return; }
+  const validOffers = state.offers.filter(o => o.lines.some(ln => ln.cats.length));
+  if (!validOffers.length) { el.innerHTML = `<div class="empty">Add an offer with at least one category line.</div>`; return; }
+
+  // deep copy pool
+  const pool = {};
+  for (const c in state.pool) pool[c] = { ...state.pool[c] };
+
+  const offerResults = [];
+  const pickRows = []; // {offer, cat, size, qty}
+
+  for (const o of validOffers) {
+    const lines = o.lines.filter(ln => ln.cats.length && ln.qty > 0);
+    // candidate sizes = sizes present in any category used
+    const sizeSet = new Set();
+    lines.forEach(ln => ln.cats.forEach(c => Object.keys(pool[c] || {}).forEach(s => sizeSet.add(s))));
+    const sizes = [...sizeSet].sort(sizeSort);
+
+    // possible boxes per size
+    const possible = {};
+    for (const s of sizes) {
+      let minBoxes = Infinity;
+      for (const ln of lines) minBoxes = Math.min(minBoxes, Math.floor(poolQty(pool, ln.cats, s) / ln.qty));
+      if (minBoxes > 0 && minBoxes !== Infinity) possible[s] = minBoxes;
+    }
+
+    // apply cap (proportional, largest remainder)
+    let alloc = { ...possible };
+    const total = Object.values(possible).reduce((a, b) => a + b, 0);
+    const cap = o.cap !== "" && o.cap !== null ? parseInt(o.cap, 10) : NaN;
+    if (!isNaN(cap) && cap >= 0 && total > cap) {
+      alloc = {};
+      const entries = Object.entries(possible);
+      let assigned = 0;
+      const fracs = entries.map(([s, n]) => {
+        const exact = n * cap / total, fl = Math.floor(exact);
+        alloc[s] = fl; assigned += fl;
+        return { s, frac: exact - fl, avail: n };
+      });
+      fracs.sort((a, b) => b.frac - a.frac || b.avail - a.avail);
+      for (const f of fracs) {
+        if (assigned >= cap) break;
+        if (alloc[f.s] < f.avail) { alloc[f.s]++; assigned++; }
+      }
+    }
+
+    // consume stock + build per-size detail
+    const sizeRows = [];
+    for (const s of sizes) {
+      const boxes = alloc[s] || 0;
+      if (!boxes && !(possible[s])) {
+        // record why: limiting line with zero
+        continue;
+      }
+      // limiting line label (before consumption)
+      let limLabel = "", limVal = Infinity;
+      for (const ln of lines) {
+        const v = Math.floor(poolQty(pool, ln.cats, s) / ln.qty);
+        if (v < limVal) { limVal = v; limLabel = ln.cats.join("+"); }
+      }
+      if (boxes > 0) {
+        for (const ln of lines) {
+          let need = boxes * ln.qty;
+          // consume greedily from category with most stock in this size
+          const catsSorted = () => [...ln.cats].sort((a, b) => ((pool[b] && pool[b][s]) || 0) - ((pool[a] && pool[a][s]) || 0));
+          while (need > 0) {
+            const c = catsSorted()[0];
+            const have = (pool[c] && pool[c][s]) || 0;
+            if (have <= 0) break; // shouldn't happen if maths is right
+            const take = Math.min(have, need);
+            pool[c][s] -= take; need -= take;
+            const pr = pickRows.find(r => r.offer === o.name && r.cat === c && r.size === s);
+            if (pr) pr.qty += take; else pickRows.push({ offer: o.name, cat: c, size: s, qty: take });
+          }
+        }
+      }
+      sizeRows.push({ size: s, boxes, capped: boxes < (possible[s] || 0), limiting: limLabel });
+    }
+    offerResults.push({ offer: o, sizeRows, total: Object.values(alloc).reduce((a, b) => a + b, 0), uncapped: total });
+  }
+
+  state.lastResults = { offerResults, pickRows, leftovers: pool };
+  renderResults();
+}
+
+function renderResults() {
+  const { offerResults, pickRows, leftovers } = state.lastResults;
+  const el = document.getElementById("results");
+  let html = "";
+
+  for (const r of offerResults) {
+    const cappedNote = r.total < r.uncapped ? ` <span class="pill">capped — ${r.uncapped.toLocaleString()} possible</span>` : "";
+    html += `<div class="result-offer">
+      <h3>${esc(r.offer.name)} — <span class="total">${r.total.toLocaleString()} boxes</span>${cappedNote}</h3>
+      <div class="sub">${r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${esc(l.cats.join("+"))}`).join("  ·  ")}</div>
+      <div class="tablewrap"><table>
+        <tr><th>Size</th><th>Boxes</th><th>Limited by</th></tr>
+        ${r.sizeRows.filter(sr => sr.boxes > 0).map(sr =>
+          `<tr><td>${esc(sr.size)}</td><td>${sr.boxes.toLocaleString()}${sr.capped ? " *" : ""}</td><td class="limit">${esc(sr.limiting)}</td></tr>`).join("")
+          || `<tr><td colspan="3" class="empty">No sizes can make a full box.</td></tr>`}
+      </table></div>
+      ${r.sizeRows.some(sr => sr.capped) ? `<div class="footnote">* reduced by cap</div>` : ""}
+    </div>`;
+  }
+
+  // picking list
+  const combined = {};
+  pickRows.forEach(r => {
+    const k = r.cat + "||" + r.size;
+    combined[k] = (combined[k] || 0) + r.qty;
+  });
+  const combRows = Object.entries(combined).map(([k, q]) => {
+    const [cat, size] = k.split("||"); return { cat, size, qty: q };
+  }).sort((a, b) => a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size));
+  const totalUnits = combRows.reduce((a, r) => a + r.qty, 0);
+
+  // leftovers
+  const leftRows = [];
+  for (const c of Object.keys(leftovers).sort()) {
+    for (const s of Object.keys(leftovers[c]).sort(sizeSort)) {
+      if (leftovers[c][s] > 0) leftRows.push({ cat: c, size: s, qty: leftovers[c][s] });
+    }
+  }
+  const leftUnits = leftRows.reduce((a, r) => a + r.qty, 0);
+
+  html += `<div class="grid2">
+    <div>
+      <h3 style="font-size:15px;margin-bottom:8px">Picking list <span class="pill">${totalUnits.toLocaleString()} units total</span></h3>
+      <div class="tablewrap"><table>
+        <tr><th>Category</th><th>Size</th><th>Pick</th></tr>
+        ${combRows.map(r => `<tr><td>${esc(r.cat)}</td><td style="text-align:right">${esc(r.size)}</td><td>${r.qty.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">Nothing to pick.</td></tr>`}
+      </table></div>
+    </div>
+    <div>
+      <h3 style="font-size:15px;margin-bottom:8px">Stock left over <span class="pill">${leftUnits.toLocaleString()} units</span></h3>
+      <div class="tablewrap"><table>
+        <tr><th>Category</th><th>Size</th><th>Left</th></tr>
+        ${leftRows.map(r => `<tr><td>${esc(r.cat)}</td><td style="text-align:right">${esc(r.size)}</td><td>${r.qty.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">All stock consumed.</td></tr>`}
+      </table></div>
+    </div>
+  </div>
+  <div class="exports">
+    <button class="primary" id="exp-summary">⬇ Export box summary CSV</button>
+    <button class="primary" id="exp-pick">⬇ Export picking list CSV</button>
+  </div>
+  <div class="footnote">Where a line pools multiple categories, stock is taken from the category with the most units first. Picking list shows per-offer detail in the export.</div>`;
+
+  el.innerHTML = html;
+  document.getElementById("exp-summary").addEventListener("click", exportSummary);
+  document.getElementById("exp-pick").addEventListener("click", exportPick);
+}
+
+/* ---------- exports ---------- */
+function csvEsc(v) { v = String(v); return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; }
+function download(name, rows) {
+  const csv = rows.map(r => r.map(csvEsc).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function exportSummary() {
+  const rows = [["Offer", "Recipe", "Size", "Boxes", "Limited by"]];
+  state.lastResults.offerResults.forEach(r => {
+    const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} x ${l.cats.join("+")}`).join(" · ");
+    r.sizeRows.filter(sr => sr.boxes > 0).forEach(sr => rows.push([r.offer.name, recipe, sr.size, sr.boxes, sr.limiting]));
+    rows.push([r.offer.name, recipe, "TOTAL", r.total, ""]);
+  });
+  download(`mystery-box-summary-${today()}.csv`, rows);
+}
+
+function exportPick() {
+  const rows = [["Offer", "Category", "Size", "Pick qty"]];
+  const sorted = [...state.lastResults.pickRows].sort((a, b) =>
+    a.offer.localeCompare(b.offer) || a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size));
+  sorted.forEach(r => rows.push([r.offer, r.cat, r.size, r.qty]));
+  // combined section
+  rows.push([]);
+  rows.push(["ALL OFFERS COMBINED", "Category", "Size", "Pick qty"]);
+  const combined = {};
+  state.lastResults.pickRows.forEach(r => { const k = r.cat + "||" + r.size; combined[k] = (combined[k] || 0) + r.qty; });
+  Object.entries(combined).map(([k, q]) => { const [cat, size] = k.split("||"); return { cat, size, q }; })
+    .sort((a, b) => a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size))
+    .forEach(r => rows.push(["", r.cat, r.size, r.q]));
+  download(`mystery-box-picking-list-${today()}.csv`, rows);
+}
+
+/* ---------- file input wiring ---------- */
+const drop = document.getElementById("drop");
+const fileinput = document.getElementById("fileinput");
+drop.addEventListener("click", () => fileinput.click());
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("dragover"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("dragover");
+  handleFiles(e.dataTransfer.files);
+});
+fileinput.addEventListener("change", () => { handleFiles(fileinput.files); fileinput.value = ""; });
+
+function handleFiles(files) {
+  [...files].forEach(f => {
+    const reader = new FileReader();
+    reader.onload = () => loadCSVText(reader.result, f.name);
+    reader.readAsText(f);
+  });
+}
+
+/* ---------- utils ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* expose for testing */
+window.__mb = { state, loadCSVText, compute, parseCSV };
+
+loadOffers();
+renderOffers();
+compute();
+</script>
+</body>
+</html>
