@@ -4,65 +4,76 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WNDRR Mystery Box Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d0f;
-    --panel: #17171b;
-    --panel2: #1f1f25;
-    --border: #2b2b33;
-    --text: #ececf0;
-    --muted: #8b8b96;
-    --accent: #ffd60a;
-    --accent-text: #111;
-    --good: #30d158;
-    --warn: #ff9f0a;
-    --bad: #ff453a;
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --panel2: #f8fafc;
+    --panel3: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-light: #dbeafe;
+    --good: #22c55e;
+    --good-light: #dcfce7;
+    --warn: #f59e0b;
+    --warn-light: #fef3c7;
+    --bad: #ef4444;
     --radius: 10px;
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 14px; line-height: 1.5; padding: 24px 20px 80px;
   }
+  .mono { font-family: "DM Mono", ui-monospace, monospace; }
   .wrap { max-width: 1180px; margin: 0 auto; }
   header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-  header h1 { font-size: 20px; letter-spacing: 2px; font-weight: 800; }
+  header h1 { font-family: "DM Mono", ui-monospace, monospace; font-size: 20px; letter-spacing: 1px; font-weight: 500; }
   header h1 span { color: var(--accent); }
-  .ver { color: var(--muted); font-size: 12px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
-  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .card h2 .stepnum { background: var(--accent); color: var(--accent-text); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+  .ver { color: var(--muted); font-size: 12px; font-family: "DM Mono", ui-monospace, monospace; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; box-shadow: var(--shadow-card); }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .card h2 .stepnum { background: var(--accent); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
   .drop {
     border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px; text-align: center;
-    color: var(--muted); cursor: pointer; transition: border-color .15s, background .15s;
+    color: var(--muted); cursor: pointer; transition: border-color .15s, background .15s; background: var(--panel2);
   }
-  .drop.dragover { border-color: var(--accent); background: rgba(255, 214, 10, 0.05); color: var(--text); }
+  .drop.dragover { border-color: var(--accent); background: var(--accent-light); color: var(--text); }
   .drop strong { color: var(--text); }
   .filechips { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
   .chip { background: var(--panel2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--muted); }
-  .chip.loaded { border-color: var(--good); color: var(--good); }
+  .chip.loaded { border-color: var(--good); color: #15803d; background: var(--good-light); }
   .matchreport { margin-top: 12px; font-size: 13px; }
-  .matchreport .ok { color: var(--good); }
-  .matchreport .warn { color: var(--warn); }
+  .matchreport .ok { color: #15803d; }
+  .matchreport .warn { color: #b45309; }
   .matchreport ul { margin: 6px 0 0 18px; color: var(--muted); }
   button {
-    background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 7px;
-    padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500;
+    box-shadow: var(--shadow-card);
   }
-  button:hover { border-color: var(--muted); }
-  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
-  button.primary:hover { filter: brightness(1.1); }
+  button:hover { border-color: #cbd5e1; background: var(--panel2); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { background: var(--accent-hover); }
   button.small { padding: 3px 9px; font-size: 12px; }
-  button.danger:hover { border-color: var(--bad); color: var(--bad); }
+  button.danger:hover { border-color: var(--bad); color: var(--bad); background: #fef2f2; }
+  button:disabled { opacity: .45; cursor: default; }
   input[type=text], input[type=number] {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 7px; color: var(--text);
     padding: 7px 10px; font-size: 13px; font-family: inherit;
   }
-  input:focus { outline: none; border-color: var(--accent); }
+  input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .offer { background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
   .offer-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-  .offer-head .prio { color: var(--accent); font-weight: 800; font-size: 15px; min-width: 24px; }
+  .offer-head .prio { color: var(--accent); font-weight: 700; font-size: 15px; min-width: 24px; font-family: "DM Mono", monospace; }
   .offer-head input[name=oname] { flex: 1; min-width: 160px; font-weight: 600; }
   .offer-head label { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
   .offer-head input[name=ocap] { width: 80px; }
@@ -75,35 +86,45 @@
   .catmenu {
     display: none; position: absolute; z-index: 10; top: calc(100% + 4px); left: 0; right: 0;
     background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px;
-    max-height: 260px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    max-height: 260px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
   .catmenu.open { display: block; }
   .catmenu label { display: flex; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 5px; cursor: pointer; font-size: 13px; }
-  .catmenu label:hover { background: var(--panel2); }
-  .catmenu .catqty { margin-left: auto; color: var(--muted); font-size: 11px; }
+  .catmenu label:hover { background: var(--panel3); }
+  .catmenu .catqty { margin-left: auto; color: var(--muted); font-size: 11px; font-family: "DM Mono", monospace; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th, td { border-bottom: 1px solid var(--border); padding: 6px 10px; text-align: right; white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; }
   th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-  td.limit { color: var(--muted); font-size: 12px; text-align: left; }
+  td { font-family: "DM Mono", ui-monospace, monospace; font-size: 12.5px; }
+  td:first-child { font-family: "Inter", system-ui, sans-serif; font-size: 13px; }
+  td.limit { color: var(--muted); font-size: 12px; text-align: left; font-family: "Inter", system-ui, sans-serif; }
   .tablewrap { overflow-x: auto; }
   .result-offer { margin-bottom: 22px; }
   .result-offer h3 { font-size: 15px; margin-bottom: 4px; }
-  .result-offer h3 .total { color: var(--accent); }
+  .result-offer h3 .total { color: var(--accent); font-family: "DM Mono", monospace; }
   .result-offer .sub { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
-  .exports { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .exports { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
   .empty { color: var(--muted); font-style: italic; }
   .footnote { color: var(--muted); font-size: 12px; margin-top: 10px; }
-  .pill { display: inline-block; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; font-size: 11px; color: var(--muted); margin-left: 6px; }
+  .pill { display: inline-block; background: var(--panel3); border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; font-size: 11px; color: var(--muted); margin-left: 6px; font-family: "Inter", system-ui, sans-serif; font-weight: 500; }
+  .settings-toggle { margin-left: auto; }
+  #settingsbody { margin-top: 4px; }
+  #settingsbody .maprow td { padding: 4px 10px; }
+  #settingsbody input { width: 220px; }
+  #settingsbody td { font-family: "Inter", system-ui, sans-serif; }
+  .mapped-to { color: var(--accent); font-weight: 600; }
+  h4.subhead { font-size: 13px; margin: 18px 0 8px; }
+  .picktable td.stylename { max-width: 340px; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>WNDRR <span>MYSTERY BOX</span> BUILDER</h1>
-    <span class="ver">Ver. 1.0.1</span>
+    <span class="ver">Ver. 1.1.0</span>
   </header>
 
   <div class="card">
@@ -119,11 +140,21 @@
     <div class="matchreport" id="matchreport"></div>
   </div>
 
+  <div class="card" id="settingscard" style="display:none">
+    <h2><span class="stepnum">⚙</span> Settings — type mapping
+      <button class="small settings-toggle" id="settingstoggle">Show</button>
+    </h2>
+    <div id="settingsbody" style="display:none">
+      <div class="footnote" style="margin:0 0 10px">Map the product types from your file to the offer types you build boxes with — e.g. point BOX FIT TEES and HEAVY WEIGHT TEES both at TEES and recipes just say "TEES". Leave a mapping as-is to keep the type on its own. Mappings are remembered on this device.</div>
+      <div class="tablewrap"><table id="maptable"></table></div>
+    </div>
+  </div>
+
   <div class="card">
     <h2><span class="stepnum">2</span> Mystery box offers <span class="pill">top offer fills first</span></h2>
     <div id="offers"></div>
     <button class="primary" id="addoffer">+ Add offer</button>
-    <div class="footnote">Each line is "N × item from these categories". Tick multiple categories to pool them (e.g. one "tees" line covering Box Fit + Heavy Weight). Cap is optional — max boxes across all sizes.</div>
+    <div class="footnote">Each line is "N × item from these offer types". Cap is optional — max boxes across all sizes.</div>
   </div>
 
   <div class="card">
@@ -137,12 +168,14 @@
 
 /* ---------- state ---------- */
 const state = {
-  products: null,   // [{sku, name, category}]
-  variants: null,   // [{sku, name, size, category, soh}]
-  pool: null,       // base pool: { cat: { size: qty } }
+  products: null,    // [{sku, name, category}]
+  variants: null,    // [{sku, name, size, category, soh}]
+  styles: null,      // [{name, sku, rawCat, sizes: {size: qty}}] joined, style-level
+  typeMap: {},       // rawCat -> offer type
   matchInfo: null,
-  offers: [],       // [{id, name, cap, lines: [{qty, cats: []}]}]
-  nextOfferId: 1
+  offers: [],
+  nextOfferId: 1,
+  lastResults: null
 };
 
 /* ---------- csv parsing ---------- */
@@ -218,14 +251,14 @@ function alertMsg(msg) {
   document.getElementById("matchreport").innerHTML = `<span class="warn">${esc(msg)}</span>`;
 }
 
-/* ---------- join ---------- */
+/* ---------- join (style level) ---------- */
 function tryJoin() {
   if (!state.products || !state.variants) { compute(); return; }
   const byName = new Map();
   state.products.forEach(p => byName.set(p.name.toUpperCase(), p));
   const skus = state.products.map(p => ({ sku: p.sku.toUpperCase(), p })).filter(x => x.sku);
 
-  const pool = {};
+  const styleMap = new Map(); // name -> style
   const matchedStyles = new Set();
   let variantRows = 0;
   state.variants.forEach(v => {
@@ -238,18 +271,33 @@ function tryJoin() {
     if (!p) return;
     matchedStyles.add(p.name.toUpperCase());
     variantRows++;
-    const cat = p.category || v.category || "UNCATEGORISED";
+    const key = p.name.toUpperCase();
+    if (!styleMap.has(key)) styleMap.set(key, { name: p.name, sku: p.sku, rawCat: p.category || v.category || "UNCATEGORISED", sizes: {} });
+    const st = styleMap.get(key);
     const size = v.size || "OS";
-    if (!pool[cat]) pool[cat] = {};
-    pool[cat][size] = (pool[cat][size] || 0) + v.soh;
+    st.sizes[size] = (st.sizes[size] || 0) + v.soh;
   });
 
+  state.styles = [...styleMap.values()];
   const unmatched = state.products.filter(p => !matchedStyles.has(p.name.toUpperCase()));
-  state.pool = pool;
   state.matchInfo = { matched: matchedStyles.size, total: state.products.length, variantRows, unmatched };
+
+  // default mappings for any new raw types
+  rawCats().forEach(c => { if (!(c in state.typeMap)) state.typeMap[c] = c; });
+  saveTypeMap();
+
   renderMatchReport();
+  renderSettings();
   renderOffers();
   compute();
+}
+
+function rawCats() {
+  return state.styles ? [...new Set(state.styles.map(s => s.rawCat))].sort() : [];
+}
+
+function offerTypes() {
+  return [...new Set(Object.values(state.typeMap))].sort();
 }
 
 function levenshtein(a, b) {
@@ -284,25 +332,76 @@ function renderMatchReport() {
   el.innerHTML = html;
 }
 
+/* ---------- settings (type mapping) ---------- */
+function renderSettings() {
+  const card = document.getElementById("settingscard");
+  if (!state.styles) { card.style.display = "none"; return; }
+  card.style.display = "";
+  const cats = rawCats();
+  const stockByCat = {};
+  state.styles.forEach(s => {
+    stockByCat[s.rawCat] = (stockByCat[s.rawCat] || 0) + Object.values(s.sizes).reduce((a, b) => a + b, 0);
+  });
+  const dl = `<datalist id="typelist">${offerTypes().map(t => `<option value="${esc(t)}">`).join("")}</datalist>`;
+  document.getElementById("maptable").innerHTML = `
+    <tr><th>Product type (from file)</th><th style="text-align:left">Maps to offer type</th><th>Units</th></tr>
+    ${cats.map(c => `
+      <tr class="maprow">
+        <td>${esc(c)}</td>
+        <td style="text-align:left"><input type="text" list="typelist" data-raw="${esc(c)}" value="${esc(state.typeMap[c] || c)}"></td>
+        <td>${(stockByCat[c] || 0).toLocaleString()}</td>
+      </tr>`).join("")}` + dl;
+}
+
+document.getElementById("settingstoggle").addEventListener("click", e => {
+  const body = document.getElementById("settingsbody");
+  const show = body.style.display === "none";
+  body.style.display = show ? "" : "none";
+  e.target.textContent = show ? "Hide" : "Show";
+});
+
+document.getElementById("maptable").addEventListener("change", e => {
+  const raw = e.target.dataset.raw;
+  if (raw === undefined) return;
+  const val = e.target.value.trim().toUpperCase() || raw;
+  e.target.value = val;
+  state.typeMap[raw] = val;
+  saveTypeMap();
+  // re-render offers so type checkboxes reflect new groups; drop vanished types from recipes
+  const valid = new Set(offerTypes());
+  state.offers.forEach(o => o.lines.forEach(ln => { ln.cats = ln.cats.filter(c => valid.has(c)); }));
+  saveOffers();
+  renderSettings();
+  renderOffers();
+  compute();
+});
+
+function saveTypeMap() {
+  try { localStorage.setItem("mb_typemap", JSON.stringify(state.typeMap)); } catch (e) {}
+}
+function loadTypeMap() {
+  try {
+    const m = JSON.parse(localStorage.getItem("mb_typemap"));
+    if (m && typeof m === "object") state.typeMap = m;
+  } catch (e) {}
+}
+
 /* ---------- offers ---------- */
 function addOffer() {
   state.offers.push({ id: state.nextOfferId++, name: `Mystery Box ${state.offers.length + 1}`, cap: "", lines: [{ qty: 1, cats: [] }] });
   saveOffers(); renderOffers(); compute();
 }
 
-function categories() {
-  return state.pool ? Object.keys(state.pool).sort() : [];
-}
-
-function catStock(cat) {
-  const sizes = state.pool && state.pool[cat] ? state.pool[cat] : {};
-  return Object.values(sizes).reduce((a, b) => a + b, 0);
+function typeStock(t) {
+  if (!state.styles) return 0;
+  return state.styles.filter(s => state.typeMap[s.rawCat] === t)
+    .reduce((a, s) => a + Object.values(s.sizes).reduce((x, y) => x + y, 0), 0);
 }
 
 function renderOffers() {
   const el = document.getElementById("offers");
   if (!state.offers.length) { el.innerHTML = `<div class="empty" style="margin-bottom:12px">No offers yet.</div>`; return; }
-  const cats = categories();
+  const types = offerTypes();
   el.innerHTML = state.offers.map((o, oi) => `
     <div class="offer" data-oid="${o.id}">
       <div class="offer-head">
@@ -319,13 +418,13 @@ function renderOffers() {
           <span class="x">×</span>
           <div class="catpick">
             <button class="${ln.cats.length ? "hascats" : ""}" data-act="catmenu" data-oid="${o.id}" data-li="${li}">
-              ${ln.cats.length ? esc(ln.cats.join(" + ")) : "choose categories…"}
+              ${ln.cats.length ? esc(ln.cats.join(" + ")) : "choose offer types…"}
             </button>
             <div class="catmenu" data-menu="${o.id}-${li}">
-              ${cats.length ? cats.map(c => `
-                <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-cat="${esc(c)}" ${ln.cats.includes(c) ? "checked" : ""}>
-                ${esc(c)}<span class="catqty">${catStock(c).toLocaleString()} units</span></label>`).join("")
-                : `<div class="empty" style="padding:6px">Load files first to see categories.</div>`}
+              ${types.length ? types.map(t => `
+                <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-cat="${esc(t)}" ${ln.cats.includes(t) ? "checked" : ""}>
+                ${esc(t)}<span class="catqty">${typeStock(t).toLocaleString()} units</span></label>`).join("")
+                : `<div class="empty" style="padding:6px">Load files first to see offer types.</div>`}
             </div>
           </div>
           <button class="small danger" data-act="delline" data-oid="${o.id}" data-li="${li}" ${o.lines.length === 1 ? "disabled" : ""}>✕</button>
@@ -352,7 +451,7 @@ document.getElementById("offers").addEventListener("click", e => {
     const wasOpen = menu.classList.contains("open");
     document.querySelectorAll(".catmenu.open").forEach(m => m.classList.remove("open"));
     if (!wasOpen) menu.classList.add("open");
-    return; // don't re-render, keep menu open
+    return;
   }
   saveOffers(); renderOffers(); compute();
 });
@@ -368,7 +467,7 @@ document.getElementById("offers").addEventListener("change", e => {
     if (t.checked) { if (!ln.cats.includes(t.dataset.cat)) ln.cats.push(t.dataset.cat); }
     else ln.cats = ln.cats.filter(c => c !== t.dataset.cat);
     const pickBtn = t.closest(".catpick").querySelector("button");
-    pickBtn.textContent = ln.cats.length ? ln.cats.join(" + ") : "choose categories…";
+    pickBtn.textContent = ln.cats.length ? ln.cats.join(" + ") : "choose offer types…";
     pickBtn.classList.toggle("hascats", !!ln.cats.length);
   }
   saveOffers(); compute();
@@ -406,100 +505,146 @@ function sizeSort(a, b) {
   return a.localeCompare(b);
 }
 
-/* ---------- computation ---------- */
-function poolQty(pool, cats, size) {
-  return cats.reduce((s, c) => s + ((pool[c] && pool[c][size]) || 0), 0);
+/* ---------- computation (style level) ---------- */
+// largest-remainder proportional split of `total` across items with weights/limits
+function proportionalSplit(items, total) {
+  // items: [{key, avail}] -> {key: alloc}
+  const sumAvail = items.reduce((a, it) => a + it.avail, 0);
+  const out = {};
+  if (sumAvail <= total) { items.forEach(it => out[it.key] = it.avail); return out; }
+  let assigned = 0;
+  const fracs = items.map(it => {
+    const exact = it.avail * total / sumAvail, fl = Math.floor(exact);
+    out[it.key] = fl; assigned += fl;
+    return { key: it.key, frac: exact - fl, avail: it.avail };
+  });
+  fracs.sort((a, b) => b.frac - a.frac || b.avail - a.avail);
+  for (const f of fracs) {
+    if (assigned >= total) break;
+    if (out[f.key] < f.avail) { out[f.key]++; assigned++; }
+  }
+  return out;
 }
 
 function compute() {
   const el = document.getElementById("results");
-  if (!state.pool) { el.innerHTML = `<div class="empty">Load both files to see results.</div>`; return; }
+  if (!state.styles) { el.innerHTML = `<div class="empty">Load both files to see results.</div>`; return; }
   const validOffers = state.offers.filter(o => o.lines.some(ln => ln.cats.length));
-  if (!validOffers.length) { el.innerHTML = `<div class="empty">Add an offer with at least one category line.</div>`; return; }
+  if (!validOffers.length) { el.innerHTML = `<div class="empty">Add an offer with at least one offer-type line.</div>`; return; }
 
-  // deep copy pool
-  const pool = {};
-  for (const c in state.pool) pool[c] = { ...state.pool[c] };
+  // working copy of style stock: styleIdx -> {size: qty}
+  const stock = state.styles.map(s => ({ ...s.sizes }));
+  const styleType = state.styles.map(s => state.typeMap[s.rawCat] || s.rawCat);
+
+  const typeQty = (type, size) => {
+    let q = 0;
+    for (let i = 0; i < state.styles.length; i++) if (styleType[i] === type) q += stock[i][size] || 0;
+    return q;
+  };
+  const lineQty = (cats, size) => cats.reduce((a, c) => a + typeQty(c, size), 0);
 
   const offerResults = [];
-  const pickRows = []; // {offer, cat, size, qty}
+  const pickRows = []; // {offer, styleIdx, size, qty}
 
   for (const o of validOffers) {
     const lines = o.lines.filter(ln => ln.cats.length && ln.qty > 0);
-    // candidate sizes = sizes present in any category used
     const sizeSet = new Set();
-    lines.forEach(ln => ln.cats.forEach(c => Object.keys(pool[c] || {}).forEach(s => sizeSet.add(s))));
+    lines.forEach(ln => ln.cats.forEach(c => {
+      state.styles.forEach((s, i) => {
+        if (styleType[i] === c) Object.keys(stock[i]).forEach(sz => { if (stock[i][sz] > 0) sizeSet.add(sz); });
+      });
+    }));
     const sizes = [...sizeSet].sort(sizeSort);
 
-    // possible boxes per size
     const possible = {};
     for (const s of sizes) {
       let minBoxes = Infinity;
-      for (const ln of lines) minBoxes = Math.min(minBoxes, Math.floor(poolQty(pool, ln.cats, s) / ln.qty));
+      for (const ln of lines) minBoxes = Math.min(minBoxes, Math.floor(lineQty(ln.cats, s) / ln.qty));
       if (minBoxes > 0 && minBoxes !== Infinity) possible[s] = minBoxes;
     }
 
-    // apply cap (proportional, largest remainder)
     let alloc = { ...possible };
     const total = Object.values(possible).reduce((a, b) => a + b, 0);
     const cap = o.cap !== "" && o.cap !== null ? parseInt(o.cap, 10) : NaN;
     if (!isNaN(cap) && cap >= 0 && total > cap) {
-      alloc = {};
-      const entries = Object.entries(possible);
-      let assigned = 0;
-      const fracs = entries.map(([s, n]) => {
-        const exact = n * cap / total, fl = Math.floor(exact);
-        alloc[s] = fl; assigned += fl;
-        return { s, frac: exact - fl, avail: n };
-      });
-      fracs.sort((a, b) => b.frac - a.frac || b.avail - a.avail);
-      for (const f of fracs) {
-        if (assigned >= cap) break;
-        if (alloc[f.s] < f.avail) { alloc[f.s]++; assigned++; }
-      }
+      alloc = proportionalSplit(Object.entries(possible).map(([k, v]) => ({ key: k, avail: v })), cap);
     }
 
-    // consume stock + build per-size detail
     const sizeRows = [];
     for (const s of sizes) {
+      if (!(s in possible)) continue;
       const boxes = alloc[s] || 0;
-      if (!boxes && !(possible[s])) {
-        // record why: limiting line with zero
-        continue;
-      }
-      // limiting line label (before consumption)
       let limLabel = "", limVal = Infinity;
       for (const ln of lines) {
-        const v = Math.floor(poolQty(pool, ln.cats, s) / ln.qty);
+        const v = Math.floor(lineQty(ln.cats, s) / ln.qty);
         if (v < limVal) { limVal = v; limLabel = ln.cats.join("+"); }
       }
       if (boxes > 0) {
         for (const ln of lines) {
-          let need = boxes * ln.qty;
-          // consume greedily from category with most stock in this size
-          const catsSorted = () => [...ln.cats].sort((a, b) => ((pool[b] && pool[b][s]) || 0) - ((pool[a] && pool[a][s]) || 0));
-          while (need > 0) {
-            const c = catsSorted()[0];
-            const have = (pool[c] && pool[c][s]) || 0;
-            if (have <= 0) break; // shouldn't happen if maths is right
-            const take = Math.min(have, need);
-            pool[c][s] -= take; need -= take;
-            const pr = pickRows.find(r => r.offer === o.name && r.cat === c && r.size === s);
-            if (pr) pr.qty += take; else pickRows.push({ offer: o.name, cat: c, size: s, qty: take });
+          const need = boxes * ln.qty;
+          // spread across styles in these types proportionally to their stock (variety)
+          const eligible = [];
+          state.styles.forEach((st, i) => {
+            if (ln.cats.includes(styleType[i]) && (stock[i][s] || 0) > 0) eligible.push({ key: i, avail: stock[i][s] });
+          });
+          const split = proportionalSplit(eligible, need);
+          for (const [k, q] of Object.entries(split)) {
+            if (q <= 0) continue;
+            const i = +k;
+            stock[i][s] -= q;
+            pickRows.push({ offer: o.name, styleIdx: i, size: s, qty: q });
           }
         }
       }
-      sizeRows.push({ size: s, boxes, capped: boxes < (possible[s] || 0), limiting: limLabel });
+      sizeRows.push({ size: s, boxes, capped: boxes < possible[s], limiting: limLabel });
     }
     offerResults.push({ offer: o, sizeRows, total: Object.values(alloc).reduce((a, b) => a + b, 0), uncapped: total });
   }
 
-  state.lastResults = { offerResults, pickRows, leftovers: pool };
+  state.lastResults = { offerResults, pickRows, stockAfter: stock, styleType };
   renderResults();
 }
 
+/* ---------- picking matrix helpers ---------- */
+function buildMatrix(rows) {
+  // rows: [{styleIdx, size, qty}] -> {sizes: [..], lines: [{style, type, cells: {size: qty}, total}]}
+  const byStyle = new Map();
+  const sizeSet = new Set();
+  rows.forEach(r => {
+    sizeSet.add(r.size);
+    if (!byStyle.has(r.styleIdx)) byStyle.set(r.styleIdx, {});
+    const cells = byStyle.get(r.styleIdx);
+    cells[r.size] = (cells[r.size] || 0) + r.qty;
+  });
+  const sizes = [...sizeSet].sort(sizeSort);
+  const lines = [...byStyle.entries()].map(([i, cells]) => ({
+    style: state.styles[i].name,
+    sku: state.styles[i].sku,
+    type: state.lastResults.styleType[i],
+    cells,
+    total: Object.values(cells).reduce((a, b) => a + b, 0)
+  })).sort((a, b) => a.type.localeCompare(b.type) || a.style.localeCompare(b.style));
+  return { sizes, lines };
+}
+
+function matrixHTML(m, cls) {
+  const colTotals = {};
+  m.lines.forEach(l => m.sizes.forEach(s => { colTotals[s] = (colTotals[s] || 0) + (l.cells[s] || 0); }));
+  const grand = m.lines.reduce((a, l) => a + l.total, 0);
+  return `<div class="tablewrap"><table class="${cls || ""}">
+    <tr><th>Style</th><th>Type</th>${m.sizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
+    ${m.lines.map(l => `<tr>
+      <td class="stylename">${esc(l.style)}</td>
+      <td class="limit">${esc(l.type)}</td>
+      ${m.sizes.map(s => `<td>${l.cells[s] ? l.cells[s].toLocaleString() : ""}</td>`).join("")}
+      <td><strong>${l.total.toLocaleString()}</strong></td>
+    </tr>`).join("")}
+    <tr><td><strong>Total</strong></td><td></td>${m.sizes.map(s => `<td><strong>${(colTotals[s] || 0).toLocaleString()}</strong></td>`).join("")}<td><strong>${grand.toLocaleString()}</strong></td></tr>
+  </table></div>`;
+}
+
 function renderResults() {
-  const { offerResults, pickRows, leftovers } = state.lastResults;
+  const { offerResults, pickRows, stockAfter } = state.lastResults;
   const el = document.getElementById("results");
   let html = "";
 
@@ -518,51 +663,43 @@ function renderResults() {
     </div>`;
   }
 
-  // picking list
-  const combined = {};
-  pickRows.forEach(r => {
-    const k = r.cat + "||" + r.size;
-    combined[k] = (combined[k] || 0) + r.qty;
-  });
-  const combRows = Object.entries(combined).map(([k, q]) => {
-    const [cat, size] = k.split("||"); return { cat, size, qty: q };
-  }).sort((a, b) => a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size));
-  const totalUnits = combRows.reduce((a, r) => a + r.qty, 0);
+  // picking list: combined matrix on screen (per-offer detail in the PDF)
+  const matrix = buildMatrix(pickRows);
+  const totalUnits = matrix.lines.reduce((a, l) => a + l.total, 0);
+  html += `<h4 class="subhead">Picking list — all offers combined <span class="pill">${totalUnits.toLocaleString()} units</span></h4>`;
+  html += matrix.lines.length ? matrixHTML(matrix, "picktable") : `<div class="empty">Nothing to pick.</div>`;
 
-  // leftovers
-  const leftRows = [];
-  for (const c of Object.keys(leftovers).sort()) {
-    for (const s of Object.keys(leftovers[c]).sort(sizeSort)) {
-      if (leftovers[c][s] > 0) leftRows.push({ cat: c, size: s, qty: leftovers[c][s] });
+  // leftovers by offer type × size
+  const leftBy = {};
+  stockAfter.forEach((sizes, i) => {
+    const t = state.lastResults.styleType[i];
+    for (const s in sizes) {
+      if (sizes[s] > 0) {
+        leftBy[t] = leftBy[t] || {};
+        leftBy[t][s] = (leftBy[t][s] || 0) + sizes[s];
+      }
     }
-  }
-  const leftUnits = leftRows.reduce((a, r) => a + r.qty, 0);
+  });
+  const leftRows = [];
+  Object.keys(leftBy).sort().forEach(t => {
+    Object.keys(leftBy[t]).sort(sizeSort).forEach(s => leftRows.push({ t, s, q: leftBy[t][s] }));
+  });
+  const leftUnits = leftRows.reduce((a, r) => a + r.q, 0);
+  html += `<h4 class="subhead">Stock left over <span class="pill">${leftUnits.toLocaleString()} units</span></h4>
+    <div class="tablewrap"><table>
+      <tr><th>Offer type</th><th>Size</th><th>Left</th></tr>
+      ${leftRows.map(r => `<tr><td>${esc(r.t)}</td><td>${esc(r.s)}</td><td>${r.q.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">All stock consumed.</td></tr>`}
+    </table></div>`;
 
-  html += `<div class="grid2">
-    <div>
-      <h3 style="font-size:15px;margin-bottom:8px">Picking list <span class="pill">${totalUnits.toLocaleString()} units total</span></h3>
-      <div class="tablewrap"><table>
-        <tr><th>Category</th><th>Size</th><th>Pick</th></tr>
-        ${combRows.map(r => `<tr><td>${esc(r.cat)}</td><td style="text-align:right">${esc(r.size)}</td><td>${r.qty.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">Nothing to pick.</td></tr>`}
-      </table></div>
-    </div>
-    <div>
-      <h3 style="font-size:15px;margin-bottom:8px">Stock left over <span class="pill">${leftUnits.toLocaleString()} units</span></h3>
-      <div class="tablewrap"><table>
-        <tr><th>Category</th><th>Size</th><th>Left</th></tr>
-        ${leftRows.map(r => `<tr><td>${esc(r.cat)}</td><td style="text-align:right">${esc(r.size)}</td><td>${r.qty.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">All stock consumed.</td></tr>`}
-      </table></div>
-    </div>
+  html += `<div class="exports">
+    <button class="primary" id="exp-pdf">🖨 Picking list PDF</button>
+    <button id="exp-summary">⬇ Box summary CSV</button>
   </div>
-  <div class="exports">
-    <button class="primary" id="exp-summary">⬇ Export box summary CSV</button>
-    <button class="primary" id="exp-pick">⬇ Export picking list CSV</button>
-  </div>
-  <div class="footnote">Where a line pools multiple categories, stock is taken from the category with the most units first. Picking list shows per-offer detail in the export.</div>`;
+  <div class="footnote">Picks are spread across every style in an offer type in proportion to stock, so boxes get variety. The PDF has a page per offer plus the combined list.</div>`;
 
   el.innerHTML = html;
   document.getElementById("exp-summary").addEventListener("click", exportSummary);
-  document.getElementById("exp-pick").addEventListener("click", exportPick);
+  document.getElementById("exp-pdf").addEventListener("click", exportPDF);
 }
 
 /* ---------- exports ---------- */
@@ -576,6 +713,9 @@ function download(name, rows) {
   URL.revokeObjectURL(a.href);
 }
 function today() { return new Date().toISOString().slice(0, 10); }
+function niceDate() {
+  return new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
 
 function exportSummary() {
   const rows = [["Offer", "Recipe", "Size", "Boxes", "Limited by"]];
@@ -587,20 +727,79 @@ function exportSummary() {
   download(`mystery-box-summary-${today()}.csv`, rows);
 }
 
-function exportPick() {
-  const rows = [["Offer", "Category", "Size", "Pick qty"]];
-  const sorted = [...state.lastResults.pickRows].sort((a, b) =>
-    a.offer.localeCompare(b.offer) || a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size));
-  sorted.forEach(r => rows.push([r.offer, r.cat, r.size, r.qty]));
-  // combined section
-  rows.push([]);
-  rows.push(["ALL OFFERS COMBINED", "Category", "Size", "Pick qty"]);
-  const combined = {};
-  state.lastResults.pickRows.forEach(r => { const k = r.cat + "||" + r.size; combined[k] = (combined[k] || 0) + r.qty; });
-  Object.entries(combined).map(([k, q]) => { const [cat, size] = k.split("||"); return { cat, size, q }; })
-    .sort((a, b) => a.cat.localeCompare(b.cat) || sizeSort(a.size, b.size))
-    .forEach(r => rows.push(["", r.cat, r.size, r.q]));
-  download(`mystery-box-picking-list-${today()}.csv`, rows);
+function exportPDF() {
+  const R = state.lastResults;
+  const sections = [];
+  for (const r of R.offerResults) {
+    if (r.total <= 0) continue;
+    const m = buildMatrix(R.pickRows.filter(p => p.offer === r.offer.name));
+    const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${l.cats.join("+")}`).join("  ·  ");
+    sections.push(`<section>
+      <h2>${esc(r.offer.name)} <span class="count">${r.total.toLocaleString()} boxes</span></h2>
+      <div class="recipe">${esc(recipe)}</div>
+      ${pdfMatrix(m)}
+    </section>`);
+  }
+  if (R.offerResults.length > 1) {
+    const m = buildMatrix(R.pickRows);
+    sections.push(`<section>
+      <h2>All offers combined</h2>
+      ${pdfMatrix(m)}
+    </section>`);
+  }
+  const doc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>WNDRR Picking List — ${today()}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Inter", system-ui, sans-serif; color: #0f172a; padding: 32px 36px; font-size: 12px; }
+    .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid #0f172a; padding-bottom: 10px; margin-bottom: 6px; }
+    .head h1 { font-family: "DM Mono", monospace; font-size: 20px; font-weight: 500; letter-spacing: 1px; }
+    .head .date { color: #64748b; font-size: 12px; }
+    .subtitle { color: #64748b; margin-bottom: 20px; font-size: 12px; }
+    section { margin-bottom: 26px; page-break-inside: avoid; }
+    section h2 { font-size: 15px; margin-bottom: 2px; }
+    section h2 .count { color: #2563eb; font-family: "DM Mono", monospace; font-weight: 500; font-size: 14px; }
+    .recipe { color: #64748b; font-size: 11px; margin-bottom: 8px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e2e8f0; padding: 4px 7px; text-align: right; font-size: 11px; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+    th { background: #f1f5f9; color: #334155; text-transform: uppercase; font-size: 9.5px; letter-spacing: .5px; }
+    td { font-family: "DM Mono", monospace; }
+    td:nth-child(2) { font-family: "Inter", system-ui, sans-serif; }
+    td.type { color: #64748b; font-size: 10px; text-align: left; }
+    tr.total td { background: #f8fafc; font-weight: 600; border-top: 2px solid #cbd5e1; }
+    .checkcol { width: 26px; }
+    @media print { body { padding: 0; } .noprint { display: none; } }
+    .noprint { position: fixed; top: 14px; right: 14px; }
+    .noprint button { font-family: inherit; font-size: 13px; padding: 8px 16px; background: #2563eb; color: #fff; border: 0; border-radius: 7px; cursor: pointer; }
+  </style></head><body>
+  <div class="noprint"><button onclick="print()">Print / Save as PDF</button></div>
+  <div class="head"><h1>WNDRR — MYSTERY BOX PICKING LIST</h1><span class="date">${esc(niceDate())}</span></div>
+  <div class="subtitle">Pick the quantities below per style and size. Generated by Mystery Box Builder.</div>
+  ${sections.join("")}
+  <script>window.onload = () => setTimeout(() => print(), 400);<\/script>
+  </body></html>`;
+  const w = window.open("", "_blank");
+  if (!w) { alert("Pop-up blocked — allow pop-ups for this site to export the PDF."); return; }
+  w.document.write(doc);
+  w.document.close();
+}
+
+function pdfMatrix(m) {
+  const colTotals = {};
+  m.lines.forEach(l => m.sizes.forEach(s => { colTotals[s] = (colTotals[s] || 0) + (l.cells[s] || 0); }));
+  const grand = m.lines.reduce((a, l) => a + l.total, 0);
+  return `<table>
+    <tr><th class="checkcol">✓</th><th>Style</th><th>Type</th>${m.sizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
+    ${m.lines.map(l => `<tr>
+      <td class="checkcol"></td>
+      <td>${esc(l.style)}</td>
+      <td class="type">${esc(l.type)}</td>
+      ${m.sizes.map(s => `<td>${l.cells[s] ? l.cells[s].toLocaleString() : ""}</td>`).join("")}
+      <td>${l.total.toLocaleString()}</td>
+    </tr>`).join("")}
+    <tr class="total"><td></td><td>Total</td><td></td>${m.sizes.map(s => `<td>${(colTotals[s] || 0).toLocaleString()}</td>`).join("")}<td>${grand.toLocaleString()}</td></tr>
+  </table>`;
 }
 
 /* ---------- file input wiring ---------- */
@@ -629,8 +828,9 @@ function esc(s) {
 }
 
 /* expose for testing */
-window.__mb = { state, loadCSVText, compute, parseCSV };
+window.__mb = { state, loadCSVText, compute, parseCSV, buildMatrix };
 
+loadTypeMap();
 loadOffers();
 renderOffers();
 compute();
