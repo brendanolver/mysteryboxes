@@ -122,7 +122,7 @@
 <div class="wrap">
   <header>
     <h1>WNDRR <span>MYSTERY BOX</span> BUILDER</h1>
-    <span class="ver">Ver. 1.2.0</span>
+    <span class="ver">Ver. 1.3.0</span>
   </header>
 
   <div class="card">
@@ -647,20 +647,33 @@ function renderResults() {
   const el = document.getElementById("results");
   let html = "";
 
-  for (const r of offerResults) {
-    const cappedNote = r.total < r.uncapped ? ` <span class="pill">capped — ${r.uncapped.toLocaleString()} possible</span>` : "";
-    html += `<div class="result-offer">
-      <h3>${esc(r.offer.name)} — <span class="total">${r.total.toLocaleString()} boxes</span>${cappedNote}</h3>
-      <div class="sub">${r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${esc(l.cats.join("+"))}`).join("  ·  ")}</div>
-      <div class="tablewrap"><table>
-        <tr><th>Size</th><th>Boxes</th><th>Limited by</th></tr>
-        ${r.sizeRows.filter(sr => sr.boxes > 0).map(sr =>
-          `<tr><td>${esc(sr.size)}</td><td>${sr.boxes.toLocaleString()}${sr.capped ? " *" : ""}</td><td class="limit">${esc(sr.limiting)}</td></tr>`).join("")
-          || `<tr><td colspan="3" class="empty">No sizes can make a full box.</td></tr>`}
-      </table></div>
-      ${r.sizeRows.some(sr => sr.capped) ? `<div class="footnote">* reduced by cap</div>` : ""}
-    </div>`;
-  }
+  // boxes matrix: offers down, sizes across
+  const boxSizes = [...new Set(offerResults.flatMap(r => r.sizeRows.filter(sr => sr.boxes > 0).map(sr => sr.size)))].sort(sizeSort);
+  const grandBoxes = offerResults.reduce((a, r) => a + r.total, 0);
+  const anyCapped = offerResults.some(r => r.sizeRows.some(sr => sr.capped));
+  const colBoxTotals = {};
+  offerResults.forEach(r => r.sizeRows.forEach(sr => { colBoxTotals[sr.size] = (colBoxTotals[sr.size] || 0) + sr.boxes; }));
+  html += `<h4 class="subhead" style="margin-top:4px">Boxes by offer <span class="pill">${grandBoxes.toLocaleString()} boxes</span></h4>
+    <div class="tablewrap"><table class="picktable">
+    <tr><th>Offer</th><th>Recipe</th>${boxSizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
+    ${offerResults.map(r => {
+      const bySize = {}; r.sizeRows.forEach(sr => bySize[sr.size] = sr);
+      const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${esc(l.cats.join("+"))}`).join("  ·  ");
+      const cappedNote = r.total < r.uncapped ? ` <span class="pill" title="reduced by cap">capped — ${r.uncapped.toLocaleString()} possible</span>` : "";
+      return `<tr>
+        <td>${esc(r.offer.name)}</td>
+        <td class="limit">${recipe}</td>
+        ${boxSizes.map(s => {
+          const sr = bySize[s];
+          if (!sr || !sr.boxes) return "<td></td>";
+          return `<td title="limited by ${esc(sr.limiting)}">${sr.boxes.toLocaleString()}${sr.capped ? " *" : ""}</td>`;
+        }).join("")}
+        <td><strong>${r.total.toLocaleString()}</strong>${cappedNote}</td>
+      </tr>`;
+    }).join("")}
+    ${offerResults.length > 1 ? `<tr><td><strong>Total</strong></td><td></td>${boxSizes.map(s => `<td><strong>${(colBoxTotals[s] || 0).toLocaleString()}</strong></td>`).join("")}<td><strong>${grandBoxes.toLocaleString()}</strong></td></tr>` : ""}
+  </table></div>
+  ${anyCapped ? `<div class="footnote">* reduced by cap — hover a number to see what limits that size</div>` : `<div class="footnote">Hover a number to see what limits that size.</div>`}`;
 
   // picking list: combined matrix on screen (per-offer detail in the PDF)
   const matrix = buildMatrix(pickRows);
@@ -679,15 +692,20 @@ function renderResults() {
       }
     }
   });
-  const leftRows = [];
-  Object.keys(leftBy).sort().forEach(t => {
-    Object.keys(leftBy[t]).sort(sizeSort).forEach(s => leftRows.push({ t, s, q: leftBy[t][s] }));
-  });
-  const leftUnits = leftRows.reduce((a, r) => a + r.q, 0);
+  const leftTypes = Object.keys(leftBy).sort();
+  const leftSizes = [...new Set(leftTypes.flatMap(t => Object.keys(leftBy[t])))].sort(sizeSort);
+  const leftUnits = leftTypes.reduce((a, t) => a + Object.values(leftBy[t]).reduce((x, y) => x + y, 0), 0);
+  const colLeftTotals = {};
+  leftTypes.forEach(t => leftSizes.forEach(s => { colLeftTotals[s] = (colLeftTotals[s] || 0) + (leftBy[t][s] || 0); }));
   html += `<h4 class="subhead">Stock left over <span class="pill">${leftUnits.toLocaleString()} units</span></h4>
     <div class="tablewrap"><table>
-      <tr><th>Offer type</th><th>Size</th><th>Left</th></tr>
-      ${leftRows.map(r => `<tr><td>${esc(r.t)}</td><td>${esc(r.s)}</td><td>${r.q.toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">All stock consumed.</td></tr>`}
+      <tr><th>Offer type</th>${leftSizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
+      ${leftTypes.map(t => `<tr>
+        <td>${esc(t)}</td>
+        ${leftSizes.map(s => `<td>${leftBy[t][s] ? leftBy[t][s].toLocaleString() : ""}</td>`).join("")}
+        <td><strong>${Object.values(leftBy[t]).reduce((a, b) => a + b, 0).toLocaleString()}</strong></td>
+      </tr>`).join("") || `<tr><td class="empty">All stock consumed.</td></tr>`}
+      ${leftTypes.length > 1 ? `<tr><td><strong>Total</strong></td>${leftSizes.map(s => `<td><strong>${(colLeftTotals[s] || 0).toLocaleString()}</strong></td>`).join("")}<td><strong>${leftUnits.toLocaleString()}</strong></td></tr>` : ""}
     </table></div>`;
 
   html += `<div class="exports">
