@@ -97,6 +97,11 @@
   th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
   td.limit { color: var(--muted); font-size: 12px; text-align: left; }
   .picktable th:nth-child(2), .picktable td:nth-child(2) { text-align: left; }
+  .toggle { margin-left: 10px; display: inline-flex; }
+  .toggle button { border-radius: 0; box-shadow: none; font-size: 11px; padding: 3px 10px; }
+  .toggle button:first-child { border-radius: 6px 0 0 6px; }
+  .toggle button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+  .toggle button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
   .tablewrap { overflow-x: auto; }
   .result-offer { margin-bottom: 22px; }
   .result-offer h3 { font-size: 15px; margin-bottom: 4px; }
@@ -122,7 +127,7 @@
 <div class="wrap">
   <header>
     <h1>WNDRR <span>MYSTERY BOX</span> BUILDER</h1>
-    <span class="ver">Ver. 1.3.0</span>
+    <span class="ver">Ver. 1.4.0</span>
   </header>
 
   <div class="card">
@@ -675,11 +680,27 @@ function renderResults() {
   </table></div>
   ${anyCapped ? `<div class="footnote">* reduced by cap — hover a number to see what limits that size</div>` : `<div class="footnote">Hover a number to see what limits that size.</div>`}`;
 
-  // picking list: combined matrix on screen (per-offer detail in the PDF)
-  const matrix = buildMatrix(pickRows);
-  const totalUnits = matrix.lines.reduce((a, l) => a + l.total, 0);
-  html += `<h4 class="subhead">Picking list — all offers combined <span class="pill">${totalUnits.toLocaleString()} units</span></h4>`;
-  html += matrix.lines.length ? matrixHTML(matrix, "picktable") : `<div class="empty">Nothing to pick.</div>`;
+  // picking list with combined / by-offer toggle
+  const totalUnits = pickRows.reduce((a, r) => a + r.qty, 0);
+  const byOffer = state.pickView === "byoffer";
+  html += `<h4 class="subhead">Picking list <span class="pill">${totalUnits.toLocaleString()} units</span>
+    <span class="toggle">
+      <button class="small ${!byOffer ? "on" : ""}" data-view="combined">All offers</button><button class="small ${byOffer ? "on" : ""}" data-view="byoffer">By offer</button>
+    </span></h4>`;
+  if (!pickRows.length) {
+    html += `<div class="empty">Nothing to pick.</div>`;
+  } else if (byOffer) {
+    for (const r of offerResults) {
+      const rows = pickRows.filter(p => p.offer === r.offer.name);
+      if (!rows.length) continue;
+      const m = buildMatrix(rows);
+      const units = m.lines.reduce((a, l) => a + l.total, 0);
+      html += `<div class="sub" style="margin:10px 0 4px"><strong style="color:var(--text)">${esc(r.offer.name)}</strong> — ${units.toLocaleString()} units</div>`;
+      html += matrixHTML(m, "picktable");
+    }
+  } else {
+    html += matrixHTML(buildMatrix(pickRows), "picktable");
+  }
 
   // leftovers by offer type × size
   const leftBy = {};
@@ -717,6 +738,11 @@ function renderResults() {
   el.innerHTML = html;
   document.getElementById("exp-summary").addEventListener("click", exportSummary);
   document.getElementById("exp-pdf").addEventListener("click", exportPDF);
+  el.querySelectorAll(".toggle button").forEach(b => b.addEventListener("click", () => {
+    state.pickView = b.dataset.view;
+    try { localStorage.setItem("mb_pickview", state.pickView); } catch (e) {}
+    renderResults();
+  }));
 }
 
 /* ---------- exports ---------- */
@@ -744,6 +770,34 @@ function exportSummary() {
   download(`mystery-box-summary-${today()}.csv`, rows);
 }
 
+function pdfBoxSummary(r) {
+  const rows = r.sizeRows.filter(sr => sr.boxes > 0);
+  if (!rows.length) return "";
+  return `<table class="boxsum">
+    <tr><th>Boxes to make</th>${rows.map(sr => `<th>${esc(sr.size)}</th>`).join("")}<th>Total</th></tr>
+    <tr><td>Boxes</td>${rows.map(sr => `<td>${sr.boxes.toLocaleString()}${sr.capped ? " *" : ""}</td>`).join("")}<td><strong>${r.total.toLocaleString()}</strong></td></tr>
+  </table>`;
+}
+
+function pdfOffersSummary(R) {
+  const sizes = [...new Set(R.offerResults.flatMap(r => r.sizeRows.filter(sr => sr.boxes > 0).map(sr => sr.size)))].sort(sizeSort);
+  const colTotals = {};
+  R.offerResults.forEach(r => r.sizeRows.forEach(sr => { colTotals[sr.size] = (colTotals[sr.size] || 0) + sr.boxes; }));
+  const grand = R.offerResults.reduce((a, r) => a + r.total, 0);
+  return `<table class="offers boxsum">
+    <tr><th>Offer</th><th>Recipe</th>${sizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
+    ${R.offerResults.map(r => {
+      const bySize = {}; r.sizeRows.forEach(sr => bySize[sr.size] = sr);
+      const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${l.cats.join("+")}`).join(" · ");
+      return `<tr><td>${esc(r.offer.name)}</td><td>${esc(recipe)}</td>${sizes.map(s => {
+        const sr = bySize[s];
+        return `<td>${sr && sr.boxes ? sr.boxes.toLocaleString() + (sr.capped ? " *" : "") : ""}</td>`;
+      }).join("")}<td><strong>${r.total.toLocaleString()}</strong></td></tr>`;
+    }).join("")}
+    <tr class="total"><td>Total</td><td></td>${sizes.map(s => `<td>${(colTotals[s] || 0).toLocaleString()}</td>`).join("")}<td>${grand.toLocaleString()}</td></tr>
+  </table>`;
+}
+
 function exportPDF() {
   const R = state.lastResults;
   const sections = [];
@@ -754,6 +808,7 @@ function exportPDF() {
     sections.push(`<section>
       <h2>${esc(r.offer.name)} <span class="count">${r.total.toLocaleString()} boxes</span></h2>
       <div class="recipe">${esc(recipe)}</div>
+      ${pdfBoxSummary(r)}
       ${pdfMatrix(m)}
     </section>`);
   }
@@ -761,6 +816,7 @@ function exportPDF() {
     const m = buildMatrix(R.pickRows);
     sections.push(`<section>
       <h2>All offers combined</h2>
+      ${pdfOffersSummary(R)}
       ${pdfMatrix(m)}
     </section>`);
   }
@@ -779,8 +835,12 @@ function exportPDF() {
     .recipe { color: #64748b; font-size: 11px; margin-bottom: 8px; }
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #e2e8f0; padding: 4px 7px; text-align: right; font-size: 11px; }
-    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) { text-align: left; }
+    th:first-child, td:first-child { text-align: left; }
+    table.pick th:nth-child(-n+3), table.pick td:nth-child(-n+3),
+    table.offers th:nth-child(2), table.offers td:nth-child(2) { text-align: left; }
     th { background: #f1f5f9; color: #334155; text-transform: uppercase; font-size: 9.5px; letter-spacing: .5px; }
+    .boxsum { margin-bottom: 10px; }
+    .boxsum td:first-child, .offers td:nth-child(2) { color: #64748b; }
     td.type { color: #64748b; font-size: 10px; text-align: left; }
     tr.total td { background: #f8fafc; font-weight: 600; border-top: 2px solid #cbd5e1; }
     .checkcol { width: 26px; }
@@ -804,7 +864,7 @@ function pdfMatrix(m) {
   const colTotals = {};
   m.lines.forEach(l => m.sizes.forEach(s => { colTotals[s] = (colTotals[s] || 0) + (l.cells[s] || 0); }));
   const grand = m.lines.reduce((a, l) => a + l.total, 0);
-  return `<table>
+  return `<table class="pick">
     <tr><th class="checkcol">✓</th><th>Style</th><th>Description</th><th>Type</th>${m.sizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
     ${m.lines.map(l => `<tr>
       <td class="checkcol"></td>
@@ -846,6 +906,7 @@ function esc(s) {
 /* expose for testing */
 window.__mb = { state, loadCSVText, compute, parseCSV, buildMatrix };
 
+try { state.pickView = localStorage.getItem("mb_pickview") || "combined"; } catch (e) { state.pickView = "combined"; }
 loadTypeMap();
 loadOffers();
 renderOffers();
