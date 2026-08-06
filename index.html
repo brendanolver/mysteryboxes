@@ -92,7 +92,10 @@
   .catmenu.open { display: block; }
   .catmenu label { display: flex; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 5px; cursor: pointer; font-size: 13px; }
   .catmenu label:hover { background: var(--panel3); }
-  .catmenu .catqty { margin-left: auto; color: var(--muted); font-size: 11px; }
+  .catmenu .catqty { margin-left: auto; color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .catsearch { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+  .catsection { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--muted); padding: 6px 6px 2px; }
+  .cathint { color: var(--muted); font-size: 12px; font-style: italic; padding: 4px 6px; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th, td { border-bottom: 1px solid var(--border); padding: 6px 10px; text-align: right; white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; }
@@ -134,7 +137,7 @@
   <header>
     <img class="logo" src="data:image/png;base64,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" alt="WNDRR">
     <h1>WNDRR <span>MYSTERY BOX</span> BUILDER</h1>
-    <span class="ver">Ver. 1.4.7</span>
+    <span class="ver">Ver. 1.4.8</span>
   </header>
 
   <div class="card">
@@ -400,7 +403,7 @@ function loadTypeMap() {
 
 /* ---------- offers ---------- */
 function addOffer() {
-  state.offers.push({ id: state.nextOfferId++, name: `Mystery Box ${state.offers.length + 1}`, cap: "", lines: [{ qty: 1, cats: [] }] });
+  state.offers.push({ id: state.nextOfferId++, name: `Mystery Box ${state.offers.length + 1}`, cap: "", lines: [{ qty: 1, cats: [], styles: [] }] });
   saveOffers(); renderOffers(); compute();
 }
 
@@ -408,6 +411,38 @@ function typeStock(t) {
   if (!state.styles) return 0;
   return state.styles.filter(s => state.typeMap[s.rawCat] === t)
     .reduce((a, s) => a + Object.values(s.sizes).reduce((x, y) => x + y, 0), 0);
+}
+
+function lineActive(ln) { return ln.cats.length || (ln.styles || []).length; }
+function lineLabel(ln) {
+  const parts = [...ln.cats, ...(ln.styles || [])];
+  return parts.join(" + ");
+}
+
+function catMenuLists(o, ln, li, q) {
+  const query = (q || "").trim().toUpperCase();
+  const types = offerTypes().filter(t => !query || t.includes(query));
+  let html = `<div class="catsection">Offer types</div>`;
+  html += types.length ? types.map(t => `
+    <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-cat="${esc(t)}" ${ln.cats.includes(t) ? "checked" : ""}>
+    ${esc(t)}<span class="catqty">${typeStock(t).toLocaleString()} units</span></label>`).join("")
+    : `<div class="cathint">No matching types.</div>`;
+  html += `<div class="catsection">Specific products</div>`;
+  if (!state.styles) {
+    html += `<div class="cathint">Load files first.</div>`;
+  } else {
+    const sel = ln.styles || [];
+    const matches = query
+      ? state.styles.filter(s => s.name.toUpperCase().includes(query))
+      : state.styles.filter(s => sel.includes(s.name));
+    const shown = matches.slice(0, 40);
+    html += shown.map(s => `
+      <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-style="${esc(s.name)}" ${sel.includes(s.name) ? "checked" : ""}>
+      ${esc(s.name)}<span class="catqty">${Object.values(s.sizes).reduce((a, b) => a + b, 0).toLocaleString()} units</span></label>`).join("");
+    if (!query && !shown.length) html += `<div class="cathint">Type above to search products…</div>`;
+    else if (matches.length > 40) html += `<div class="cathint">+${matches.length - 40} more — keep typing…</div>`;
+  }
+  return html;
 }
 
 function renderOffers() {
@@ -429,14 +464,12 @@ function renderOffers() {
           <input type="number" class="qty" min="1" value="${ln.qty}" data-oid="${o.id}" data-li="${li}" name="lqty">
           <span class="x">×</span>
           <div class="catpick">
-            <button class="${ln.cats.length ? "hascats" : ""}" data-act="catmenu" data-oid="${o.id}" data-li="${li}">
-              ${ln.cats.length ? esc(ln.cats.join(" + ")) : "choose offer types…"}
+            <button class="${lineActive(ln) ? "hascats" : ""}" data-act="catmenu" data-oid="${o.id}" data-li="${li}">
+              ${lineActive(ln) ? esc(lineLabel(ln)) : "choose types or products…"}
             </button>
             <div class="catmenu" data-menu="${o.id}-${li}">
-              ${types.length ? types.map(t => `
-                <label><input type="checkbox" data-oid="${o.id}" data-li="${li}" data-cat="${esc(t)}" ${ln.cats.includes(t) ? "checked" : ""}>
-                ${esc(t)}<span class="catqty">${typeStock(t).toLocaleString()} units</span></label>`).join("")
-                : `<div class="empty" style="padding:6px">Load files first to see offer types.</div>`}
+              <input type="text" class="catsearch" placeholder="Search types or products…" data-oid="${o.id}" data-li="${li}">
+              <div class="catlists">${types.length || state.styles ? catMenuLists(o, ln, li, "") : `<div class="empty" style="padding:6px">Load files first.</div>`}</div>
             </div>
           </div>
           <button class="small danger" data-act="delline" data-oid="${o.id}" data-li="${li}" ${o.lines.length === 1 ? "disabled" : ""}>✕</button>
@@ -456,7 +489,7 @@ document.getElementById("offers").addEventListener("click", e => {
   if (act === "up" && oi > 0) [state.offers[oi - 1], state.offers[oi]] = [state.offers[oi], state.offers[oi - 1]];
   else if (act === "down" && oi < state.offers.length - 1) [state.offers[oi + 1], state.offers[oi]] = [state.offers[oi], state.offers[oi + 1]];
   else if (act === "del") state.offers.splice(oi, 1);
-  else if (act === "addline") o.lines.push({ qty: 1, cats: [] });
+  else if (act === "addline") o.lines.push({ qty: 1, cats: [], styles: [] });
   else if (act === "delline") o.lines.splice(+btn.dataset.li, 1);
   else if (act === "catmenu") {
     const menu = btn.parentElement.querySelector(".catmenu");
@@ -471,18 +504,34 @@ document.getElementById("offers").addEventListener("click", e => {
 document.getElementById("offers").addEventListener("change", e => {
   const t = e.target, o = findOffer(t.dataset.oid);
   if (!o) return;
+  if (t.classList.contains("catsearch")) return;
   if (t.name === "oname") o.name = t.value;
   else if (t.name === "ocap") o.cap = t.value;
   else if (t.name === "lqty") o.lines[+t.dataset.li].qty = Math.max(1, parseInt(t.value, 10) || 1);
-  else if (t.dataset.cat !== undefined) {
+  else if (t.dataset.cat !== undefined || t.dataset.style !== undefined) {
     const ln = o.lines[+t.dataset.li];
-    if (t.checked) { if (!ln.cats.includes(t.dataset.cat)) ln.cats.push(t.dataset.cat); }
-    else ln.cats = ln.cats.filter(c => c !== t.dataset.cat);
+    if (t.dataset.cat !== undefined) {
+      if (t.checked) { if (!ln.cats.includes(t.dataset.cat)) ln.cats.push(t.dataset.cat); }
+      else ln.cats = ln.cats.filter(c => c !== t.dataset.cat);
+    } else {
+      ln.styles = ln.styles || [];
+      if (t.checked) { if (!ln.styles.includes(t.dataset.style)) ln.styles.push(t.dataset.style); }
+      else ln.styles = ln.styles.filter(s => s !== t.dataset.style);
+    }
     const pickBtn = t.closest(".catpick").querySelector("button");
-    pickBtn.textContent = ln.cats.length ? ln.cats.join(" + ") : "choose offer types…";
-    pickBtn.classList.toggle("hascats", !!ln.cats.length);
+    pickBtn.textContent = lineActive(ln) ? lineLabel(ln) : "choose types or products…";
+    pickBtn.classList.toggle("hascats", !!lineActive(ln));
   }
   saveOffers(); compute();
+});
+
+document.getElementById("offers").addEventListener("input", e => {
+  const t = e.target;
+  if (!t.classList.contains("catsearch")) return;
+  const o = findOffer(t.dataset.oid);
+  if (!o) return;
+  const li = +t.dataset.li;
+  t.parentElement.querySelector(".catlists").innerHTML = catMenuLists(o, o.lines[li], li, t.value);
 });
 
 document.addEventListener("click", e => {
@@ -497,7 +546,11 @@ function saveOffers() {
 function loadOffers() {
   try {
     const s = JSON.parse(localStorage.getItem("mb_offers"));
-    if (s && Array.isArray(s.offers)) { state.offers = s.offers; state.nextOfferId = s.next || 100; }
+    if (s && Array.isArray(s.offers)) {
+      state.offers = s.offers;
+      state.offers.forEach(o => o.lines.forEach(ln => { if (!Array.isArray(ln.styles)) ln.styles = []; }));
+      state.nextOfferId = s.next || 100;
+    }
   } catch (e) {}
 }
 
@@ -541,37 +594,37 @@ function proportionalSplit(items, total) {
 function compute() {
   const el = document.getElementById("results");
   if (!state.styles) { el.innerHTML = `<div class="empty">Load both files to see results.</div>`; return; }
-  const validOffers = state.offers.filter(o => o.lines.some(ln => ln.cats.length));
-  if (!validOffers.length) { el.innerHTML = `<div class="empty">Add an offer with at least one offer-type line.</div>`; return; }
+  const validOffers = state.offers.filter(o => o.lines.some(lineActive));
+  if (!validOffers.length) { el.innerHTML = `<div class="empty">Add an offer with at least one type or product line.</div>`; return; }
 
   // working copy of style stock: styleIdx -> {size: qty}
   const stock = state.styles.map(s => ({ ...s.sizes }));
   const styleType = state.styles.map(s => state.typeMap[s.rawCat] || s.rawCat);
 
-  const typeQty = (type, size) => {
+  const elig = (ln, i) => ln.cats.includes(styleType[i]) || (ln.styles || []).includes(state.styles[i].name);
+  const lineQty = (ln, size) => {
     let q = 0;
-    for (let i = 0; i < state.styles.length; i++) if (styleType[i] === type) q += stock[i][size] || 0;
+    for (let i = 0; i < state.styles.length; i++) if (elig(ln, i)) q += stock[i][size] || 0;
     return q;
   };
-  const lineQty = (cats, size) => cats.reduce((a, c) => a + typeQty(c, size), 0);
 
   const offerResults = [];
   const pickRows = []; // {offer, styleIdx, size, qty}
 
   for (const o of validOffers) {
-    const lines = o.lines.filter(ln => ln.cats.length && ln.qty > 0);
+    const lines = o.lines.filter(ln => lineActive(ln) && ln.qty > 0);
     const sizeSet = new Set();
-    lines.forEach(ln => ln.cats.forEach(c => {
+    lines.forEach(ln => {
       state.styles.forEach((s, i) => {
-        if (styleType[i] === c) Object.keys(stock[i]).forEach(sz => { if (stock[i][sz] > 0) sizeSet.add(sz); });
+        if (elig(ln, i)) Object.keys(stock[i]).forEach(sz => { if (stock[i][sz] > 0) sizeSet.add(sz); });
       });
-    }));
+    });
     const sizes = [...sizeSet].sort(sizeSort);
 
     const possible = {};
     for (const s of sizes) {
       let minBoxes = Infinity;
-      for (const ln of lines) minBoxes = Math.min(minBoxes, Math.floor(lineQty(ln.cats, s) / ln.qty));
+      for (const ln of lines) minBoxes = Math.min(minBoxes, Math.floor(lineQty(ln, s) / ln.qty));
       if (minBoxes > 0 && minBoxes !== Infinity) possible[s] = minBoxes;
     }
 
@@ -588,8 +641,8 @@ function compute() {
       const boxes = alloc[s] || 0;
       let limLabel = "", limVal = Infinity;
       for (const ln of lines) {
-        const v = Math.floor(lineQty(ln.cats, s) / ln.qty);
-        if (v < limVal) { limVal = v; limLabel = ln.cats.join("+"); }
+        const v = Math.floor(lineQty(ln, s) / ln.qty);
+        if (v < limVal) { limVal = v; limLabel = lineLabel(ln); }
       }
       if (boxes > 0) {
         for (const ln of lines) {
@@ -598,7 +651,7 @@ function compute() {
           // consumed fully before deeper styles contribute
           const eligible = [];
           state.styles.forEach((st, i) => {
-            if (ln.cats.includes(styleType[i]) && (stock[i][s] || 0) > 0) {
+            if (elig(ln, i) && (stock[i][s] || 0) > 0) {
               const totalLeft = Object.values(stock[i]).reduce((a, b) => a + b, 0);
               eligible.push({ i, avail: stock[i][s], totalLeft });
             }
@@ -685,7 +738,7 @@ function renderResults() {
     <tr><th>Offer</th><th>Recipe</th>${boxSizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
     ${offerResults.map(r => {
       const bySize = {}; r.sizeRows.forEach(sr => bySize[sr.size] = sr);
-      const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${esc(l.cats.join("+"))}`).join("  ·  ");
+      const recipe = r.offer.lines.filter(lineActive).map(l => `${l.qty} × ${esc(lineLabel(l))}`).join("  ·  ");
       const cappedNote = r.total < r.uncapped ? ` <span class="pill" title="reduced by cap">capped — ${r.uncapped.toLocaleString()} possible</span>` : "";
       return `<tr>
         <td>${esc(r.offer.name)}</td>
@@ -807,7 +860,7 @@ function niceDate() {
 function exportSummary() {
   const rows = [["Offer", "Recipe", "Size", "Boxes", "Limited by"]];
   state.lastResults.offerResults.forEach(r => {
-    const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} x ${l.cats.join("+")}`).join(" · ");
+    const recipe = r.offer.lines.filter(lineActive).map(l => `${l.qty} x ${lineLabel(l)}`).join(" · ");
     r.sizeRows.filter(sr => sr.boxes > 0).forEach(sr => rows.push([r.offer.name, recipe, sr.size, sr.boxes, sr.limiting]));
     rows.push([r.offer.name, recipe, "TOTAL", r.total, ""]);
   });
@@ -832,7 +885,7 @@ function pdfOffersSummary(R) {
     <tr><th>Offer</th><th>Recipe</th>${sizes.map(s => `<th>${esc(s)}</th>`).join("")}<th>Total</th></tr>
     ${R.offerResults.map(r => {
       const bySize = {}; r.sizeRows.forEach(sr => bySize[sr.size] = sr);
-      const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${l.cats.join("+")}`).join(" · ");
+      const recipe = r.offer.lines.filter(lineActive).map(l => `${l.qty} × ${lineLabel(l)}`).join(" · ");
       return `<tr><td>${esc(r.offer.name)}</td><td>${esc(recipe)}</td>${sizes.map(s => {
         const sr = bySize[s];
         return `<td>${sr && sr.boxes ? sr.boxes.toLocaleString() + (sr.capped ? " *" : "") : ""}</td>`;
@@ -847,7 +900,7 @@ function exportPDF() {
   const sections = [];
   for (const r of R.offerResults) {
     if (r.total <= 0) continue;
-    const recipe = r.offer.lines.filter(l => l.cats.length).map(l => `${l.qty} × ${l.cats.join("+")}`).join("  ·  ");
+    const recipe = r.offer.lines.filter(lineActive).map(l => `${l.qty} × ${lineLabel(l)}`).join("  ·  ");
     sections.push(`<section>
       <h2>${esc(r.offer.name)} <span class="count">${r.total.toLocaleString()} boxes</span></h2>
       <div class="recipe">${esc(recipe)}</div>
